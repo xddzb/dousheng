@@ -5,6 +5,7 @@ import (
 	"github.com/xddzb/dousheng/controller/test"
 	"github.com/xddzb/dousheng/controller/user"
 	"github.com/xddzb/dousheng/controller/video"
+	"github.com/xddzb/dousheng/middleware"
 	"github.com/xddzb/dousheng/model"
 )
 
@@ -20,12 +21,13 @@ func main() {
 
 	// basic apis
 	apiRouter.GET("/feed/", video.Feed)
-	apiRouter.GET("/user/", user.GetUserInfo)
-	apiRouter.POST("/user/register/", user.Register)
-	apiRouter.POST("/user/login/", user.Login)
-	apiRouter.POST("/publish/action/", video.Publish)
-	apiRouter.GET("/publish/list/", video.PublishList)
+	apiRouter.GET("/user/", middleware.JWTMidWare(), user.GetUserInfo)
+	apiRouter.POST("/user/register/", middleware.SHAMiddleWare(), user.Register) //对用户密码加密存储
+	apiRouter.POST("/user/login/", middleware.SHAMiddleWare(), user.Login)
+	apiRouter.POST("/publish/action/", middleware.JWTMidWare(), video.Publish)
+	apiRouter.GET("/publish/list/", middleware.JWTMidWare(), video.PublishList)
 
+	//测试接口
 	r.GET("/test", test.Test)
 	r.GET("/getuserinfo:id", user.GetUserInfo)
 	//启动服务

@@ -62,7 +62,7 @@ func (f *QueryVideoInfoFlow) checkParam() error {
 		return err
 	}
 	var latestTime time.Time
-	latestTime = time.Unix(intTime, 0)
+	latestTime = time.UnixMilli(intTime)
 	//若lastestTime为零 将其设置为本地当前时间
 	if latestTime.IsZero() {
 		latestTime = time.Now()
@@ -84,7 +84,7 @@ func (f *QueryVideoInfoFlow) prepareInfo() error {
 	}()
 	wg.Wait() //等待信息从model层返回
 	//设置nexttime
-	f.nextTime = time.Now().Unix()
+	f.nextTime = time.Now().UnixMilli()
 	return nil
 }
 
