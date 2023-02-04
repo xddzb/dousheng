@@ -2,21 +2,24 @@ package model
 
 import (
 	"errors"
+	"log"
 	"sync"
 	"time"
 )
 
 type Video struct {
-	Id            int64     `json:"id" gorm:"id,omitempty"`
-	Author        UserInfo  `json:"author" gorm:"-"`
-	PlayUrl       string    `json:"play_url" gorm:"play_url,omitempty"`
-	CoverUrl      string    `json:"cover_url" gorm:"cover_url,omitempty"`
-	FavoriteCount int64     `json:"favorite_count" gorm:"favorite_count,omitempty"`
-	CommentCount  int64     `json:"comment_count" gorm:"comment_count,omitempty"`
-	IsFavorite    bool      `json:"is_favorite" gorm:"is_favorite,omitempty"`
-	Title         string    `json:"title,omitempty" gorm:"title,omitempty""`
-	CreatedTime   time.Time `json:"-" gorm:"created_time,omitempty""`
-	UpdatedTime   time.Time `json:"-" gorm:"updated_time,omitempty""`
+	Id            int64       `json:"id" gorm:"id,omitempty"`
+	UserInfoId    int64       `json:"-" gorm:"user_info_id,omitempty"`
+	Author        UserInfo    `json:"author" gorm:"-"`
+	PlayUrl       string      `json:"play_url" gorm:"play_url,omitempty"`
+	CoverUrl      string      `json:"cover_url" gorm:"cover_url,omitempty"`
+	FavoriteCount int64       `json:"favorite_count" gorm:"favorite_count,omitempty"`
+	CommentCount  int64       `json:"comment_count" gorm:"comment_count,omitempty"`
+	IsFavorite    bool        `json:"is_favorite" gorm:"is_favorite,omitempty"`
+	Title         string      `json:"title,omitempty" gorm:"title,omitempty"`
+	Users         []*UserInfo `json:"-" gorm:"many2many:user_favor_videos;"`
+	CreatedTime   time.Time   `json:"-" gorm:"created_time,omitempty"`
+	UpdatedTime   time.Time   `json:"-" gorm:"updated_time,omitempty"`
 }
 
 type VideoDAO struct {
@@ -43,4 +46,39 @@ func (v *VideoDAO) QueryVideoListByLimitAndTime(limit int, latestTime time.Time,
 		Order("created_time ASC").Limit(limit).
 		Select([]string{"id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_time", "updated_time"}).
 		Find(videoList).Error
+}
+
+// AddVideo 添加视频
+func (v *VideoDAO) AddVideo(video *Video) error {
+	if video == nil {
+		return errors.New("AddVideo video 空指针")
+	}
+	return db.Create(video).Error
+}
+
+func (v *VideoDAO) QueryVideoListByUserId(userId int64, videoList *[]*Video) error {
+	if videoList == nil {
+		return errors.New("QueryVideoListByUserId videoList 空指针")
+	}
+	return db.Where("user_info_id=?", userId).
+		Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title"}).
+		Find(videoList).Error
+}
+
+func (v *VideoDAO) QueryVideoCountByUserId(userId int64, count *int64) error {
+	if count == nil {
+		return errors.New("QueryVideoCountByUserId count 空指针")
+	}
+	return db.Model(&Video{}).Where("user_info_id=?", userId).Count(count).Error
+}
+
+func (v *VideoDAO) IsVideoExistById(id int64) bool {
+	var video Video
+	if err := db.Where("id=?", id).Select("id").First(&video).Error; err != nil {
+		log.Println(err)
+	}
+	if video.Id == 0 {
+		return false
+	}
+	return true
 }

@@ -32,4 +32,9 @@ func main() {
 	r.GET("/getuserinfo:id", user.GetUserInfo)
 	//启动服务
 	r.Run(":8087")
+
+	//_, err := utils.GetSnapshot("./public/test_static.mp4", "./public/test_static", 1)
+	//if err != nil {
+	//	return
+	//}
 }
