@@ -23,7 +23,7 @@ func main() {
 	apiRouter.GET("/feed/", video.Feed)
 	apiRouter.GET("/user/", middleware.JWTMidWare(), user.GetUserInfo)
 	apiRouter.POST("/user/register/", middleware.SHAMiddleWare(), user.Register) //对用户密码加密存储
-	apiRouter.POST("/user/login/", middleware.SHAMiddleWare(), user.Login)
+	apiRouter.POST("/user/login/", middleware.SHAMiddleWare(), user.Login)       //对用户密码加密存储
 	apiRouter.POST("/publish/action/", middleware.JWTMidWare(), video.Publish)
 	apiRouter.GET("/publish/list/", middleware.JWTMidWare(), video.PublishList)
 
