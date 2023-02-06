@@ -30,4 +30,4 @@
 - Gorm
 - MySQL
 - Redis
-- ffmpeg（获取视频封面）
+- ffmpeg（获取视频封面。）
