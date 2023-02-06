@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/xddzb/dousheng/config"
 	"github.com/xddzb/dousheng/controller/test"
 	"github.com/xddzb/dousheng/controller/user"
 	"github.com/xddzb/dousheng/controller/video"
@@ -31,7 +33,7 @@ func main() {
 	r.GET("/test", test.Test)
 	r.GET("/getuserinfo:id", user.GetUserInfo)
 	//启动服务
-	r.Run(":8087")
+	r.Run(fmt.Sprintf(":%d", config.Info.Port))
 
 	//_, err := utils.GetSnapshot("./public/test_static.mp4", "./public/test_static", 1)
 	//if err != nil {
