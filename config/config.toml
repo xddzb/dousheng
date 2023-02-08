@@ -5,7 +5,7 @@ port = 3306
 database = "dousheng"
 username = "root"
 password = "123456"
-charset = "utf8mb4"
+charset = "utf8"
 parse_time = true
 loc = "Local"
 
@@ -17,5 +17,5 @@ database = 0
 
 #记录当前服务器的ip和启动端口号，当前服务器的ip用于生成对应的视频链接地址
 [server]
-ip = "127.0.0.1"
+ip = "43.143.248.13"
 port = 8087

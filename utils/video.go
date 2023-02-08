@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"github.com/xddzb/dousheng/config"
 	"github.com/xddzb/dousheng/model"
 	"log"
 	"os"
@@ -14,7 +15,7 @@ import (
 )
 
 func GetFileUrl(fileName string) string {
-	base := fmt.Sprintf("http://%s:%d/static/%s", "127.0.0.1", 8087, fileName)
+	base := fmt.Sprintf("http://%s:%d/static/%s", config.Info.Server.IP, config.Info.Server.Port, fileName)
 	return base
 }
 
