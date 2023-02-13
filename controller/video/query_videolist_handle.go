@@ -57,6 +57,7 @@ func (p *ProxyQueryVideoList) QueryVideoListError(msg string) {
 func (p *ProxyQueryVideoList) QueryVideoListOk(videoList *service.List) {
 	p.c.JSON(http.StatusOK, VideoListResponse{
 		StatusCode: 0,
+		StatusMsg:  "success",
 		List:       videoList,
 	})
 }

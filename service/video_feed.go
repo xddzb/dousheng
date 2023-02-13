@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/xddzb/dousheng/model"
+	"github.com/xddzb/dousheng/utils"
 	"strconv"
 	"sync"
 	"time"
@@ -83,8 +84,15 @@ func (f *QueryVideoInfoFlow) prepareInfo() error {
 		model.NewVideoDAO().QueryVideoListByLimitAndTime(MaxVideoNum, f.lastestTime, &f.videos)
 	}()
 	wg.Wait() //等待信息从model层返回
+	//若用户已经登录，更新该视频的点赞状态
+	lastestTime, _ := utils.FillVideoFields(f.userId, &f.videos)
+	//准备时间戳并设置nexttime
+	if lastestTime != nil {
+		f.nextTime = (*lastestTime).UnixMilli() //毫秒级
+		return nil
+	}
 	//设置nexttime
-	f.nextTime = time.Now().UnixMilli()
+	//f.nextTime = time.Now().UnixMilli()
 	return nil
 }
 

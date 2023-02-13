@@ -85,6 +85,7 @@ func JWTMidWare() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
 		c.Set("user_id", tokenStruck.ID) //在请求上下文里面设置一些值，然后其他地方取值
 		c.Next()
 	}

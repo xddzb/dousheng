@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"log"
 	"sync"
 	"time"
@@ -21,7 +22,10 @@ type Video struct {
 	CreatedTime   time.Time   `json:"-" gorm:"created_time,omitempty"`
 	UpdatedTime   time.Time   `json:"-" gorm:"updated_time,omitempty"`
 }
-
+type UserFavorVideos struct {
+	UserInfoId int64
+	VideoId    int64
+}
 type VideoDAO struct {
 }
 
@@ -81,4 +85,59 @@ func (v *VideoDAO) IsVideoExistById(id int64) bool {
 		return false
 	}
 	return true
+}
+
+// AddOneFavorByUserIdAndVideoId 增加一个赞
+func (v *VideoDAO) AddOneFavorByUserIdAndVideoId(userId int64, videoId int64) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		//gorm.Expr("quantity - ?", 1)
+		if err := db.Model(&Video{}).Where("id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
+			log.Println(err)
+			return err
+		}
+		userfavorvideo := &UserFavorVideos{
+			UserInfoId: userId,
+			VideoId:    videoId,
+		}
+		//插入操作
+		if err := db.Create(&userfavorvideo).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// SubOneFavorByUserIdAndVideoId 减少一个赞
+func (v *VideoDAO) SubOneFavorByUserIdAndVideoId(userId int64, videoId int64) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		//db.Where("name = ? AND age >= ?", "jinzhu", "22").Find(&users)
+		//执行减一操作前先检查favorite_count是否大于0
+		if err := db.Model(&Video{}).Where("id = ? AND favorite_count >= ?", videoId, 0).
+			Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
+			log.Println(err)
+			return err
+		}
+		//删除操作
+		//db.Where("name = ?", "jinzhu").Delete(&email)
+		if err := db.Where("UserInfoId = ? AND VideoId = ?", userId, videoId).
+			Delete(&UserFavorVideos{}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (v *VideoDAO) QueryFavorVideoListByUserId(userId int64, videoList *[]*Video) error {
+	if videoList == nil {
+		return errors.New("QueryFavorVideoListByUserId videoList 空指针")
+	}
+	//多表查询，左连接得到结果，再映射到数据
+	if err := db.Raw("SELECT v.* FROM user_favor_videos u , videos v WHERE u.user_info_id = ? AND u.video_id = v.id", userId).Scan(videoList).Error; err != nil {
+		return err
+	}
+	//如果id为0，则说明没有查到数据
+	if len(*videoList) == 0 || (*videoList)[0].Id == 0 {
+		return errors.New("点赞列表为空")
+	}
+	return nil
 }

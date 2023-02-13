@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/xddzb/dousheng/model"
 	"github.com/xddzb/dousheng/utils"
+	"time"
 )
 
 // PostVideo 投稿视频
@@ -20,10 +21,11 @@ func NewPostVideoFlow(userId int64, videoName, coverName, title string) *PostVid
 }
 
 type PostVideoFlow struct {
-	videoName string
-	coverName string
-	title     string
-	userId    int64
+	videoName   string
+	coverName   string
+	title       string
+	userId      int64
+	publishTime time.Time
 
 	video *model.Video
 }
@@ -41,15 +43,17 @@ func (f *PostVideoFlow) Do() error {
 func (f *PostVideoFlow) prepareParam() {
 	f.videoName = utils.GetFileUrl(f.videoName)
 	f.coverName = utils.GetFileUrl(f.coverName)
+	f.publishTime = time.Now()
 }
 
 // 组合并添加到数据库
 func (f *PostVideoFlow) publish() error {
 	video := &model.Video{
-		UserInfoId: f.userId,
-		PlayUrl:    f.videoName,
-		CoverUrl:   f.coverName,
-		Title:      f.title,
+		UserInfoId:  f.userId,
+		PlayUrl:     f.videoName,
+		CoverUrl:    f.coverName,
+		Title:       f.title,
+		CreatedTime: f.publishTime,
 	}
 	return model.NewVideoDAO().AddVideo(video)
 }

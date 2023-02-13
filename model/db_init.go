@@ -14,8 +14,11 @@ func InitDb() error {
 	//"root:123456@tcp(127.0.0.1:3306)/dousheng?charset=utf8mb4&parseTime=True&loc=Local"
 	dsn := config.DBConnectString()
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	//建表
-	//err = db.AutoMigrate(&UserInfo{}, &Video{}, &Comment{}, &UserLogin{})
+	if err != nil {
+		log.Println(err)
+	}
+	//自动建表 会为多对多关系自动建立中间表
+	err = db.AutoMigrate(&UserInfo{}, &Video{}, &UserLogin{})
 	if err != nil {
 		log.Println(err)
 	}

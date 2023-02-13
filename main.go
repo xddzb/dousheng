@@ -27,20 +27,23 @@ func main() {
 	log.Println("构建路由成功")
 	// basic apis
 	apiRouter.GET("/feed/", video.Feed)
-	apiRouter.GET("/user/", middleware.JWTMidWare(), user.GetUserInfo)
+	apiRouter.GET("/user/", middleware.JWTMidWare(), middleware.UserIdVerify(), user.GetUserInfo)
 	apiRouter.POST("/user/register/", middleware.SHAMiddleWare(), user.Register) //对用户密码加密存储
 	apiRouter.POST("/user/login/", middleware.SHAMiddleWare(), user.Login)       //对用户密码加密存储
 	apiRouter.POST("/publish/action/", middleware.JWTMidWare(), video.Publish)
 	apiRouter.GET("/publish/list/", middleware.JWTMidWare(), video.PublishList)
 
-	//测试接口
-	//r.GET("/test", test.Test)
-	//r.GET("/getuserinfo:id", user.GetUserInfo)
+	//extend 1
+	apiRouter.POST("/favorite/action/", middleware.JWTMidWare(), video.PostFavorHandler)
+	apiRouter.GET("/favorite/list/", middleware.JWTMidWare(), video.FavorVideoListHandler)
+	//apiRouter.POST("/comment/action/", middleware.JWTMiddleWare(), comment.PostCommentHandler)
+	//apiRouter.GET("/comment/list/", middleware.JWTMiddleWare(), comment.QueryCommentListHandler)
+	//
+	////extend 2
+	//apiRouter.POST("/relation/action/", middleware.JWTMiddleWare(), user_info.PostFollowActionHandler)
+	//apiRouter.GET("/relation/follow/list/", middleware.NoAuthToGetUserId(), user_info.QueryFollowListHandler)
+	//apiRouter.GET("/relation/follower/list/", middleware.NoAuthToGetUserId(), user_info.QueryFollowerHandler)
+
 	//启动服务
 	r.Run(fmt.Sprintf(":%d", config.Info.Port))
-
-	//_, err := utils.GetSnapshot("./public/test_static.mp4", "./public/test_static", 1)
-	//if err != nil {
-	//	return
-	//}
 }
