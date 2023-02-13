@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xddzb/dousheng/config"
+	"github.com/xddzb/dousheng/controller/comment"
 	"github.com/xddzb/dousheng/controller/user"
 	"github.com/xddzb/dousheng/controller/video"
 	"github.com/xddzb/dousheng/middleware"
@@ -31,18 +32,18 @@ func main() {
 	apiRouter.POST("/user/register/", middleware.SHAMiddleWare(), user.Register) //对用户密码加密存储
 	apiRouter.POST("/user/login/", middleware.SHAMiddleWare(), user.Login)       //对用户密码加密存储
 	apiRouter.POST("/publish/action/", middleware.JWTMidWare(), video.Publish)
-	apiRouter.GET("/publish/list/", middleware.JWTMidWare(), video.PublishList)
+	apiRouter.GET("/publish/list/", middleware.JWTMidWare(), middleware.UserIdVerify(), video.PublishList)
 
 	//extend 1
 	apiRouter.POST("/favorite/action/", middleware.JWTMidWare(), video.PostFavorHandler)
 	apiRouter.GET("/favorite/list/", middleware.JWTMidWare(), video.FavorVideoListHandler)
-	//apiRouter.POST("/comment/action/", middleware.JWTMiddleWare(), comment.PostCommentHandler)
-	//apiRouter.GET("/comment/list/", middleware.JWTMiddleWare(), comment.QueryCommentListHandler)
-	//
+	apiRouter.POST("/comment/action/", middleware.JWTMidWare(), comment.PostCommentHandler)
+	apiRouter.GET("/comment/list/", middleware.JWTMidWare(), comment.QueryCommentListHandler)
+
 	////extend 2
-	//apiRouter.POST("/relation/action/", middleware.JWTMiddleWare(), user_info.PostFollowActionHandler)
-	//apiRouter.GET("/relation/follow/list/", middleware.NoAuthToGetUserId(), user_info.QueryFollowListHandler)
-	//apiRouter.GET("/relation/follower/list/", middleware.NoAuthToGetUserId(), user_info.QueryFollowerHandler)
+	apiRouter.POST("/relation/action/", middleware.JWTMidWare(), user.PostFollowActionHandler)
+	apiRouter.GET("/relation/follow/list/", middleware.UserIdVerify(), user.QueryFollowListHandler)
+	apiRouter.GET("/relation/follower/list/", middleware.UserIdVerify(), user.QueryFollowerHandler)
 
 	//启动服务
 	r.Run(fmt.Sprintf(":%d", config.Info.Port))

@@ -2,12 +2,14 @@ package model
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"log"
 	"sync"
 )
 
 var (
-	ErrIvdPtr = errors.New("空指针错误")
+	ErrIvdPtr        = errors.New("空指针错误")
+	ErrEmptyUserList = errors.New("用户列表为空")
 )
 
 type UserInfo struct {
@@ -64,4 +66,47 @@ func (u *UserInfoDAO) IsUserExistById(id int64) bool {
 		return false
 	}
 	return true
+}
+
+func (u *UserInfoDAO) AddUserFollow(userId, userToId int64) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("UPDATE user_infos SET follow_count=follow_count+1 WHERE id = ?", userId).Error; err != nil {
+			return err
+		}
+		if err := tx.Exec("UPDATE user_infos SET follower_count=follower_count+1 WHERE id = ?", userToId).Error; err != nil {
+			return err
+		}
+		if err := tx.Exec("INSERT INTO `user_relations` (`user_info_id`,`follow_id`) VALUES (?,?)", userId, userToId).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (u *UserInfoDAO) CancelUserFollow(userId, userToId int64) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("UPDATE user_infos SET follow_count=follow_count-1 WHERE id = ? AND follow_count>0", userId).Error; err != nil {
+			return err
+		}
+		if err := tx.Exec("UPDATE user_infos SET follower_count=follower_count-1 WHERE id = ? AND follower_count>0", userToId).Error; err != nil {
+			return err
+		}
+		if err := tx.Exec("DELETE FROM `user_relations` WHERE user_info_id=? AND follow_id=?", userId, userToId).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+func (u *UserInfoDAO) GetFollowListByUserId(userId int64, userList *[]*UserInfo) error {
+	if userList == nil {
+		return ErrIvdPtr
+	}
+	var err error
+	if err = db.Raw("SELECT u.* FROM user_relations r, user_infos u WHERE r.user_info_id = ? AND r.follow_id = u.id", userId).Scan(userList).Error; err != nil {
+		return err
+	}
+	if len(*userList) == 0 || (*userList)[0].Id == 0 {
+		return ErrEmptyUserList
+	}
+	return nil
 }

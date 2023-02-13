@@ -18,7 +18,7 @@ func InitDb() error {
 		log.Println(err)
 	}
 	//自动建表 会为多对多关系自动建立中间表
-	err = db.AutoMigrate(&UserInfo{}, &Video{}, &UserLogin{})
+	err = db.AutoMigrate(&UserInfo{}, &Video{}, &Comment{}, &UserLogin{})
 	if err != nil {
 		log.Println(err)
 	}

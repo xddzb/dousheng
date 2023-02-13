@@ -141,3 +141,17 @@ func (v *VideoDAO) QueryFavorVideoListByUserId(userId int64, videoList *[]*Video
 	}
 	return nil
 }
+
+func (u *UserInfoDAO) GetFollowerListByUserId(userId int64, userList *[]*UserInfo) error {
+	if userList == nil {
+		return ErrIvdPtr
+	}
+	var err error
+	if err = db.Raw("SELECT u.* FROM user_relations r, user_infos u WHERE r.follow_id = ? AND r.user_info_id = u.id", userId).Scan(userList).Error; err != nil {
+		return err
+	}
+	//if len(*userList) == 0 || (*userList)[0].Id == 0 {
+	//	return ErrEmptyUserList
+	//}
+	return nil
+}
