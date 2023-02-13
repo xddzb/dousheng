@@ -38,6 +38,7 @@ func (u *UserInfoDAO) QueryUserInfoById(userId int64, userinfo *UserInfo) error 
 		return ErrIvdPtr
 	}
 	//DB.Where("id=?",userId).First(userinfo)
+	//log.Println("传入的userid", userId)
 	db.Where("id=?", userId).Select([]string{"id", "name", "follow_count", "follower_count",
 		"is_follow"}).First(userinfo)
 	//id为零值，说明sql执行失败

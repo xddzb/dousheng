@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/xddzb/dousheng/model"
+	"github.com/xddzb/dousheng/redis"
 )
 
 type List struct {
@@ -58,11 +59,11 @@ func (f *QueryVideoListByUserIdFlow) packData() error {
 		return err
 	}
 	//填充信息(Author和IsFavorite字段
-	//p := redis.NewProxyIndexMap()
+	p := redis.NewProxyIndexMap()
 	for i := range f.videos {
 		f.videos[i].Author = userInfo
-		f.videos[i].IsFavorite = true
-		//f.videos[i].IsFavorite = p.GetVideoFavorState(f.userId, f.videos[i].Id)
+		//f.videos[i].IsFavorite = true
+		f.videos[i].IsFavorite = p.GetVideoFavorState(f.userId, f.videos[i].Id)
 	}
 
 	f.videoList = &List{Videos: f.videos}

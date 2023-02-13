@@ -48,7 +48,7 @@ func (v *VideoDAO) QueryVideoListByLimitAndTime(limit int, latestTime time.Time,
 	}
 	return db.Model(&Video{}).Where("created_time<?", latestTime).
 		Order("created_time ASC").Limit(limit).
-		Select([]string{"id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_time", "updated_time"}).
+		Select([]string{"id", " user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_time", "updated_time"}).
 		Find(videoList).Error
 }
 

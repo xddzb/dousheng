@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/xddzb/dousheng/config"
+	"log"
 )
 
 var ctx = context.Background()
@@ -49,6 +50,7 @@ func (i *ProxyIndexMap) UpdateVideoFavorState(userId int64, videoId int64, state
 func (i *ProxyIndexMap) GetVideoFavorState(userId int64, videoId int64) bool {
 	key := fmt.Sprintf("%s:%d", favor, userId)
 	ret := rdb.SIsMember(ctx, key, videoId)
+	log.Println("从内存中获取点赞状态", ret.Val())
 	return ret.Val()
 }
 
